@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>くくマスター！</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap');
+
+  :root {
+    --sky: #87CEEB;
+    --sunny: #FFD700;
+    --grass: #7CDB63;
+    --coral: #FF6B6B;
+    --mint: #4DD9AC;
+    --lavender: #B39DFF;
+    --peach: #FFB347;
+    --white: #FFFEF7;
+    --ink: #2D2A4A;
+    --card-shadow: 0 6px 0 rgba(0,0,0,0.15);
+    --btn-shadow: 0 5px 0 rgba(0,0,0,0.2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'M PLUS Rounded 1c', 'Nunito', sans-serif;
+    background: linear-gradient(180deg, #C8F0FF 0%, #E8FFF0 60%, #FFF5D6 100%);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 背景の雲 */
+  .cloud {
+    position: fixed;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+  }
+  .cloud1 { width: 100px; height: 35px; top: 8%; left: -20px; animation: drift 20s linear infinite; }
+  .cloud1::before { width: 50px; height: 50px; top: -25px; left: 15px; }
+  .cloud1::after { width: 35px; height: 35px; top: -15px; left: 45px; }
+  .cloud2 { width: 80px; height: 28px; top: 20%; right: -20px; animation: drift2 25s linear infinite; }
+  .cloud2::before { width: 40px; height: 40px; top: -20px; left: 10px; }
+  .cloud2::after { width: 28px; height: 28px; top: -12px; left: 37px; }
+  .cloud3 { width: 60px; height: 22px; top: 35%; left: -10px; animation: drift 30s linear infinite 5s; }
+  .cloud3::before { width: 30px; height: 30px; top: -15px; left: 8px; }
+  .cloud3::after { width: 22px; height: 22px; top: -10px; left: 28px; }
+
+  @keyframes drift { from { transform: translateX(-120px); } to { transform: translateX(calc(100vw + 120px)); } }
+  @keyframes drift2 { from { transform: translateX(calc(100vw + 120px)); } to { transform: translateX(-120px); } }
+
+  /* ====== MAIN CONTAINER ====== */
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 16px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ====== HEADER ====== */
+  .header {
+    text-align: center;
+    padding: 12px 0 8px;
+  }
+  .logo {
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #FF6B6B, #FFB347, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 0px rgba(255,107,107,0.3));
+    line-height: 1;
+  }
+  .logo-sub {
+    font-size: 0.75rem;
+    color: #6B8FAF;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  /* ====== STATS BAR ====== */
+  .stats-bar {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+  }
+  .stat-card {
+    flex: 1;
+    background: white;
+    border-radius: 16px;
+    padding: 8px 10px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    border: 2px solid rgba(255,255,255,0.8);
+  }
+  .stat-label { font-size: 0.6rem; color: #9BA8B5; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .stat-value { font-size: 1.4rem; font-weight: 900; color: var(--ink); line-height: 1.1; }
+  .stat-value.streak { color: #FF6B6B; }
+  .stat-value.stars { color: #FFD700; }
+  .stat-value.level { color: #B39DFF; }
+
+  /* ====== SECTION SCREENS ====== */
+  .screen { display: none; flex-direction: column; gap: 16px; flex: 1; }
+  .screen.active { display: flex; }
+
+  /* ====== HOME SCREEN ====== */
+  .mascot-area {
+    text-align: center;
+    padding: 8px 0;
+  }
+  .mascot {
+    font-size: 5rem;
+    display: inline-block;
+    animation: bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+  }
+  .mascot-speech {
+    background: white;
+    border-radius: 20px;
+    padding: 12px 18px;
+    margin: 8px auto;
+    max-width: 280px;
+    box-shadow: var(--card-shadow);
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.95rem;
+    position: relative;
+  }
+  .mascot-speech::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 10px solid transparent;
+    border-bottom-color: white;
+    border-top: 0;
+  }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  /* MENU GRID */
+  .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .menu-btn {
+    background: white;
+    border: none;
+    border-radius: 22px;
+    padding: 18px 12px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.15s, box-shadow 0.15s;
+    border-bottom: 4px solid rgba(0,0,0,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .menu-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.15); border-bottom-width: 1px; }
+  .menu-btn .btn-icon { font-size: 2.5rem; display: block; margin-bottom: 6px; }
+  .menu-btn .btn-label { font-size: 0.9rem; font-weight: 800; color: var(--ink); display: block; }
+  .menu-btn .btn-sub { font-size: 0.65rem; color: #9BA8B5; font-weight: 600; display: block; margin-top: 2px; }
+  .menu-btn.practice { background: linear-gradient(135deg, #FFE5E5, #FFF5E5); }
+  .menu-btn.challenge { background: linear-gradient(135deg, #E5F5FF, #E5FFEA); }
+  .menu-btn.table { background: linear-gradient(135deg, #F0E5FF, #E5F0FF); }
+  .menu-btn.streak-btn { background: linear-gradient(135deg, #FFF5E5, #FFFFE5); }
+
+  /* ====== PROGRESS BAR ====== */
+  .progress-section {
+    background: white;
+    border-radius: 20px;
+    padding: 14px;
+    box-shadow: var(--card-shadow);
+  }
+  .progress-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #9BA8B5;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .dan-grid { display: grid; grid-template-columns: repeat(9,1fr); gap: 4px; }
+  .dan-dot {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 900;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.1s;
+  }
+  .dan-dot:active { transform: scale(0.92); }
+  .dan-dot.locked { background: #F0F2F5; color: #C5CDD8; }
+  .dan-dot.learning { background: linear-gradient(135deg, #FFE5A0, #FFD700); color: #8B6914; border-color: #FFB700; }
+  .dan-dot.mastered { background: linear-gradient(135deg, #80E8A0, #4DD9AC); color: #166B4A; }
+
+  /* ====== PRACTICE SCREEN ====== */
+  .practice-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .back-btn {
+    background: white;
+    border: none;
+    border-radius: 14px;
+    width: 44px; height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.1s;
+    border-bottom: 3px solid rgba(0,0,0,0.12);
+  }
+  .back-btn:active { transform: translateY(2px); }
+  .screen-title {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--ink);
+    flex: 1;
+  }
+
+  /* DAN SELECTOR */
+  .dan-selector {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .dan-selector::-webkit-scrollbar { display: none; }
+  .dan-chip {
+    background: white;
+    border: 2px solid #E5E8EF;
+    border-radius: 30px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #9BA8B5;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+  }
+  .dan-chip.selected {
+    background: linear-gradient(135deg, #B39DFF, #7B61FF);
+    color: white;
+    border-color: #7B61FF;
+    box-shadow: 0 3px 0 rgba(123,97,255,0.3);
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: white;
+    border-radius: 28px;
+    padding: 28px 20px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    border-bottom: 6px solid rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: rgba(179,157,255,0.1);
+    border-radius: 50%;
+  }
+  .q-label { font-size: 0.75rem; color: #9BA8B5; font-weight: 700; letter-spacing: 2px; margin-bottom: 8px; }
+  .question-text {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .question-text .times-sign { color: #B39DFF; font-size: 2.5rem; }
+  .question-text .q-mark { color: #FF6B6B; }
+
+  /* ANSWER GRID */
+  .answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .ans-btn {
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 20px;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+    border-bottom: 5px solid rgba(0,0,0,0.12);
+    transition: transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+  .ans-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.15); border-bottom-width: 2px; }
+  .ans-btn.correct { background: linear-gradient(135deg, #D8FFE8, #B8FFD8); border-color: #4DD9AC; color: #166B4A; animation: popIn 0.3s ease; }
+  .ans-btn.wrong { background: linear-gradient(135deg, #FFE8E8, #FFD0D0); border-color: #FF6B6B; color: #A82020; animation: shake 0.4s ease; }
+  @keyframes popIn { 0% { transform: scale(0.95); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+  /* RESULT AREA */
+  .result-area {
+    text-align: center;
+    padding: 8px 0;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .result-msg {
+    font-size: 1.6rem;
+    font-weight: 900;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+  }
+  .result-msg.show { opacity: 1; transform: translateY(0); }
+  .result-msg.good { color: #4DD9AC; }
+  .result-msg.bad { color: #FF6B6B; }
+  .result-hint { font-size: 0.85rem; color: #6B8FAF; font-weight: 700; opacity: 0; transition: opacity 0.3s 0.2s; }
+  .result-hint.show { opacity: 1; }
+
+  /* COMBO */
+  .combo-badge {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, #FFD700, #FFB347);
+    color: white;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 900;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(255,180,0,0.4);
+    transform: translateX(100px);
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+  .combo-badge.show { transform: translateX(0); }
+
+  /* PROGRESS BAR IN PRACTICE */
+  .q-progress {
+    height: 10px;
+    background: #E5E8EF;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .q-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #B39DFF, #4DD9AC);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  /* ====== CHALLENGE SCREEN ====== */
+  .timer-ring {
+    text-align: center;
+    padding: 10px 0;
+  }
+  .timer-svg { transform: rotate(-90deg); }
+  .timer-text {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--ink);
+    text-align: center;
+    margin-top: -8px;
+  }
+  .timer-sub { font-size: 0.75rem; color: #9BA8B5; font-weight: 700; text-align: center; }
+
+  /* ====== TABLE SCREEN ====== */
+  .table-grid-outer {
+    background: white;
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: var(--card-shadow);
+    overflow-x: auto;
+  }
+  .table-title-row {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .kuku-table { width: 100%; border-collapse: collapse; }
+  .kuku-table td {
+    padding: 5px 3px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: var(--ink);
+  }
+  .kuku-table td.header-cell { color: #9BA8B5; font-size: 0.65rem; background: none !important; }
+  .kuku-table td:not(.header-cell):hover { background: #F0E5FF; }
+  .kuku-table td.highlighted { background: linear-gradient(135deg, #B39DFF, #7B61FF); color: white; }
+
+  /* ====== RESULT SCREEN ====== */
+  .result-screen {
+    text-align: center;
+    padding: 20px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .result-emoji { font-size: 6rem; animation: popBig 0.5s ease; }
+  @keyframes popBig { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+  .result-title { font-size: 2rem; font-weight: 900; color: var(--ink); }
+  .result-score { font-size: 1.2rem; color: #6B8FAF; font-weight: 700; }
+  .result-stars { font-size: 2rem; letter-spacing: 4px; }
+  .big-btn {
+    background: linear-gradient(135deg, #B39DFF, #7B61FF);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 5px 0 rgba(100,70,220,0.35);
+    border-bottom: 4px solid rgba(0,0,0,0.15);
+    transition: transform 0.1s;
+    font-family: inherit;
+  }
+  .big-btn:active { transform: translateY(3px); }
+  .big-btn.green {
+    background: linear-gradient(135deg, #4DD9AC, #27B589);
+    box-shadow: 0 5px 0 rgba(39,181,137,0.35);
+  }
+  .big-btn.orange {
+    background: linear-gradient(135deg, #FFB347, #FF8C00);
+    box-shadow: 0 5px 0 rgba(255,140,0,0.35);
+  }
+
+  /* ====== FIREWORKS ====== */
+  .firework { position: fixed; pointer-events: none; z-index: 999; }
+  .spark {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    animation: sparkFly 0.8s ease-out forwards;
+  }
+  @keyframes sparkFly {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+
+  /* ====== STREAK SCREEN ====== */
+  .streak-calendar {
+    background: white;
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: var(--card-shadow);
+  }
+  .calendar-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .cal-day {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .cal-day.done { background: linear-gradient(135deg, #4DD9AC, #27B589); color: white; }
+  .cal-day.today { background: linear-gradient(135deg, #B39DFF, #7B61FF); color: white; }
+  .cal-day.empty { background: #F0F2F5; color: #C5CDD8; }
+
+  /* ====== NOTIFICATION-LIKE TOAST ====== */
+  .toast {
+    position: fixed;
+    top: 20px; left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--ink);
+    color: white;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    z-index: 200;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="cloud cloud1"></div>
+<div class="cloud cloud2"></div>
+<div class="cloud cloud3"></div>
+
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">くくマスター！</div>
+    <div class="logo-sub">MULTIPLICATION MASTER</div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">れんぞく</div>
+      <div class="stat-value streak" id="streakVal">0🔥</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">スター</div>
+      <div class="stat-value stars" id="starsVal">0⭐</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">レベル</div>
+      <div class="stat-value level" id="levelVal">1</div>
+    </div>
+  </div>
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="homeScreen">
+    <div class="mascot-area">
+      <div class="mascot" id="mascot">🐼</div>
+      <div class="mascot-speech" id="mascotSpeech">きょうも いっしょに かんがえよう！</div>
+    </div>
+
+    <div class="menu-grid">
+      <button class="menu-btn practice" onclick="showPractice()">
+        <span class="btn-icon">✏️</span>
+        <span class="btn-label">れんしゅう</span>
+        <span class="btn-sub">だんを えらんで</span>
+      </button>
+      <button class="menu-btn challenge" onclick="showChallenge()">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-label">チャレンジ</span>
+        <span class="btn-sub">じかんせい</span>
+      </button>
+      <button class="menu-btn table" onclick="showTable()">
+        <span class="btn-icon">📊</span>
+        <span class="btn-label">くくひょう</span>
+        <span class="btn-sub">ぜんぶ みる</span>
+      </button>
+      <button class="menu-btn streak-btn" onclick="showStreak()">
+        <span class="btn-icon">📅</span>
+        <span class="btn-label">まいにち</span>
+        <span class="btn-sub">つづけよう！</span>
+      </button>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-title">🌟 きみの せいちょう</div>
+      <div class="dan-grid" id="danProgress"></div>
+    </div>
+  </div>
+
+  <!-- PRACTICE SCREEN -->
+  <div class="screen" id="practiceScreen">
+    <div class="practice-header">
+      <button class="back-btn" onclick="goHome()">←</button>
+      <div class="screen-title">✏️ れんしゅう</div>
+      <div style="font-size:0.9rem;font-weight:900;color:#B39DFF;" id="qCountDisplay">0/10</div>
+    </div>
+
+    <div class="dan-selector" id="danSelector"></div>
+
+    <div class="q-progress"><div class="q-progress-fill" id="qProgressFill" style="width:0%"></div></div>
+
+    <div class="question-card">
+      <div class="q-label">もんだい</div>
+      <div class="question-text" id="questionText">
+        <span id="qA">3</span>
+        <span class="times-sign">×</span>
+        <span id="qB">4</span>
+        <span class="times-sign"> = </span>
+        <span class="q-mark">？</span>
+      </div>
+    </div>
+
+    <div class="result-area">
+      <div class="result-msg" id="resultMsg">せいかい！</div>
+      <div class="result-hint" id="resultHint"></div>
+    </div>
+
+    <div class="answer-grid" id="answerGrid"></div>
+  </div>
+
+  <!-- CHALLENGE SCREEN -->
+  <div class="screen" id="challengeScreen">
+    <div class="practice-header">
+      <button class="back-btn" onclick="goHome()">←</button>
+      <div class="screen-title">⚡ チャレンジ</div>
+    </div>
+
+    <div class="timer-ring">
+      <svg class="timer-svg" width="120" height="120" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#E5E8EF" stroke-width="10"/>
+        <circle cx="60" cy="60" r="52" fill="none" stroke="url(#timerGrad)" stroke-width="10"
+          stroke-linecap="round" stroke-dasharray="326.7" id="timerCircle" stroke-dashoffset="0"/>
+        <defs>
+          <linearGradient id="timerGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#B39DFF"/>
+            <stop offset="100%" stop-color="#4DD9AC"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="timer-text" id="timerText">60</div>
+    <div class="timer-sub">のこり びょう</div>
+
+    <div class="question-card">
+      <div class="q-label">もんだい</div>
+      <div class="question-text" id="cQuestionText">
+        <span id="cQA">3</span>
+        <span class="times-sign">×</span>
+        <span id="cQB">4</span>
+        <span class="times-sign"> = </span>
+        <span class="q-mark">？</span>
+      </div>
+    </div>
+
+    <div class="result-area" style="min-height:40px">
+      <div class="result-msg" id="cResultMsg"></div>
+    </div>
+
+    <div class="answer-grid" id="cAnswerGrid"></div>
+
+    <div style="text-align:center;font-size:1rem;font-weight:900;color:#9BA8B5;">
+      せいかい: <span id="cScore" style="color:#4DD9AC;font-size:1.4rem;">0</span>もん
+    </div>
+  </div>
+
+  <!-- TABLE SCREEN -->
+  <div class="screen" id="tableScreen">
+    <div class="practice-header">
+      <button class="back-btn" onclick="goHome()">←</button>
+      <div class="screen-title">📊 くくひょう</div>
+    </div>
+    <div class="table-grid-outer">
+      <div class="table-title-row" id="tableTitle">3のだん</div>
+      <div class="dan-selector" id="tableDanSelector" style="margin-bottom:12px"></div>
+      <table class="kuku-table" id="kukuTable"></table>
+    </div>
+  </div>
+
+  <!-- STREAK SCREEN -->
+  <div class="screen" id="streakScreen">
+    <div class="practice-header">
+      <button class="back-btn" onclick="goHome()">←</button>
+      <div class="screen-title">📅 まいにちきろく</div>
+    </div>
+    <div class="streak-calendar" id="streakCalendar"></div>
+    <div style="text-align:center;padding:10px 0;">
+      <div style="font-size:3rem;" id="streakFire">🔥</div>
+      <div style="font-size:1.4rem;font-weight:900;color:var(--ink);" id="streakDays">0にち れんぞく！</div>
+      <div style="font-size:0.85rem;color:#9BA8B5;font-weight:700;margin-top:4px;">きょうも やってみよう！</div>
+    </div>
+    <button class="big-btn green" onclick="showPractice()">きょうのれんしゅうをする</button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="screen" id="resultScreen">
+    <div class="result-screen" id="resultContent"></div>
+  </div>
+</div>
+
+<!-- COMBO BADGE -->
+<div class="combo-badge" id="comboBadge">🔥 コンボ x0</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ====== STATE ======
+const state = {
+  stars: parseInt(localStorage.getItem('kk_stars')||'0'),
+  level: parseInt(localStorage.getItem('kk_level')||'1'),
+  streak: parseInt(localStorage.getItem('kk_streak')||'0'),
+  lastPlay: localStorage.getItem('kk_lastPlay')||'',
+  mastered: JSON.parse(localStorage.getItem('kk_mastered')||'{}'),
+  streakDays: JSON.parse(localStorage.getItem('kk_streakDays')||'[]'),
+};
+
+// Check streak
+function checkStreak() {
+  const today = new Date().toDateString();
+  const yesterday = new Date(Date.now()-86400000).toDateString();
+  if(state.lastPlay === today) return;
+  if(state.lastPlay !== yesterday && state.lastPlay !== '') state.streak = 0;
+  state.lastPlay = today;
+  if(!state.streakDays.includes(today)) state.streakDays.push(today);
+  if(state.streakDays.length > 30) state.streakDays = state.streakDays.slice(-30);
+  saveState();
+}
+
+function saveState() {
+  localStorage.setItem('kk_stars', state.stars);
+  localStorage.setItem('kk_level', state.level);
+  localStorage.setItem('kk_streak', state.streak);
+  localStorage.setItem('kk_lastPlay', state.lastPlay);
+  localStorage.setItem('kk_mastered', JSON.stringify(state.mastered));
+  localStorage.setItem('kk_streakDays', JSON.stringify(state.streakDays));
+  updateStatsBar();
+}
+
+function updateStatsBar() {
+  document.getElementById('streakVal').textContent = state.streak + '🔥';
+  document.getElementById('starsVal').textContent = state.stars + '⭐';
+  document.getElementById('levelVal').textContent = state.level;
+}
+
+// ====== NAVIGATION ======
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  if(challengeTimer) { clearInterval(challengeTimer); challengeTimer = null; }
+  updateDanProgress();
+  updateMascot();
+  showScreen('homeScreen');
+}
+
+// ====== MASCOT ======
+const mascots = ['🐼','🦊','🐸','🐨','🦁','🐯','🐧'];
+const speeches = [
+  'きょうも いっしょに かんがえよう！',
+  'がんばれ！ きみなら できる！',
+  'れんぞくきろくを のばそう！',
+  'まいにち すこしずつ おぼえよう！',
+  'もんだいを とこう！ わくわく！',
+];
+function updateMascot() {
+  const idx = Math.floor(Math.random()*mascots.length);
+  document.getElementById('mascot').textContent = mascots[idx];
+  document.getElementById('mascotSpeech').textContent = speeches[Math.floor(Math.random()*speeches.length)];
+}
+
+// ====== DAN PROGRESS ======
+function updateDanProgress() {
+  const g = document.getElementById('danProgress');
+  g.innerHTML = '';
+  for(let d=1;d<=9;d++) {
+    const dot = document.createElement('div');
+    dot.className = 'dan-dot';
+    const score = state.mastered[d]||0;
+    if(score >= 10) dot.classList.add('mastered');
+    else if(score > 0) dot.classList.add('learning');
+    else dot.classList.add('locked');
+    dot.textContent = d + 'のだん';
+    dot.style.fontSize = '0.5rem';
+    dot.onclick = () => { startPractice(d); showScreen('practiceScreen'); }
+    g.appendChild(dot);
+  }
+}
+
+// ====== PRACTICE ======
+let currentDan = 2;
+let practiceQ = 0;
+let totalQ = 10;
+let combo = 0;
+
+function showPractice() {
+  practiceQ = 0;
+  combo = 0;
+  buildDanSelector();
+  buildTableDanSelector();
+  generatePracticeQ();
+  showScreen('practiceScreen');
+}
+
+function startPractice(dan) {
+  currentDan = dan;
+  practiceQ = 0;
+  combo = 0;
+  buildDanSelector();
+  generatePracticeQ();
+}
+
+function buildDanSelector() {
+  const sel = document.getElementById('danSelector');
+  sel.innerHTML = '';
+  for(let d=1;d<=9;d++) {
+    const chip = document.createElement('div');
+    chip.className = 'dan-chip' + (d===currentDan?' selected':'');
+    chip.textContent = d+'のだん';
+    chip.onclick = () => { currentDan = d; practiceQ=0; combo=0; buildDanSelector(); generatePracticeQ(); }
+    sel.appendChild(chip);
+  }
+}
+
+let currentQ = {};
+function generatePracticeQ() {
+  const b = Math.floor(Math.random()*9)+1;
+  const answer = currentDan * b;
+  currentQ = { a: currentDan, b, answer };
+
+  document.getElementById('qA').textContent = currentDan;
+  document.getElementById('qB').textContent = b;
+
+  // Generate wrong answers
+  const wrongs = new Set();
+  while(wrongs.size < 3) {
+    let w = answer + (Math.random()<0.5?1:-1) * (Math.floor(Math.random()*5)+1);
+    if(w>0 && w !== answer) wrongs.add(w);
+  }
+  const options = [...wrongs, answer].sort(()=>Math.random()-0.5);
+
+  const grid = document.getElementById('answerGrid');
+  grid.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = opt;
+    btn.onclick = () => checkAnswer(opt, btn, grid);
+    grid.appendChild(btn);
+  });
+
+  // Reset result
+  const rm = document.getElementById('resultMsg');
+  const rh = document.getElementById('resultHint');
+  rm.classList.remove('show','good','bad');
+  rh.classList.remove('show');
+
+  // Update count
+  document.getElementById('qCountDisplay').textContent = practiceQ+'/'+totalQ;
+  document.getElementById('qProgressFill').style.width = (practiceQ/totalQ*100)+'%';
+}
+
+function checkAnswer(selected, btn, grid) {
+  const correct = selected === currentQ.answer;
+  // Disable all buttons
+  grid.querySelectorAll('.ans-btn').forEach(b => b.onclick = null);
+  // Mark buttons
+  grid.querySelectorAll('.ans-btn').forEach(b => {
+    if(parseInt(b.textContent) === currentQ.answer) b.classList.add('correct');
+  });
+  if(!correct) btn.classList.add('wrong');
+
+  const rm = document.getElementById('resultMsg');
+  const rh = document.getElementById('resultHint');
+
+  if(correct) {
+    combo++;
+    state.stars++;
+    state.mastered[currentDan] = (state.mastered[currentDan]||0)+1;
+    const msgs = ['せいかい！🎉','すごい！✨','やったね！🌟','パーフェクト！💫','かんぺき！🎊'];
+    rm.textContent = combo >= 3 ? `🔥コンボ×${combo}！` : msgs[Math.floor(Math.random()*msgs.length)];
+    rm.className = 'result-msg show good';
+    if(combo >= 3) showCombo(combo);
+    if(Math.random() < 0.3) fireFireworks();
+  } else {
+    combo = 0;
+    rm.textContent = 'もう いちど！';
+    rm.className = 'result-msg show bad';
+    rh.textContent = `こたえは ${currentQ.a} × ${currentQ.b} = ${currentQ.answer}`;
+    rh.className = 'result-hint show';
+  }
+
+  practiceQ++;
+
+  // Level up check
+  const totalMastered = Object.values(state.mastered).reduce((a,b)=>a+b,0);
+  state.level = Math.floor(totalMastered/50)+1;
+
+  checkStreak();
+  saveState();
+
+  if(practiceQ >= totalQ) {
+    setTimeout(() => showPracticeResult(), 1200);
+  } else {
+    setTimeout(() => generatePracticeQ(), 1300);
+  }
+}
+
+function showCombo(n) {
+  const badge = document.getElementById('comboBadge');
+  badge.textContent = `🔥 コンボ ×${n}`;
+  badge.classList.add('show');
+  setTimeout(() => badge.classList.remove('show'), 1500);
+}
+
+function showPracticeResult() {
+  const s = state.stars;
+  const stars = practiceQ >= 9 ? '⭐⭐⭐' : practiceQ >= 7 ? '⭐⭐' : '⭐';
+  const emoji = practiceQ === totalQ ? '🏆' : '🎉';
+  const content = document.getElementById('resultContent');
+  content.innerHTML = `
+    <div class="result-emoji">${emoji}</div>
+    <div class="result-title">おわった！</div>
+    <div class="result-stars">${stars}</div>
+    <div class="result-score">${currentDan}のだん れんしゅう かんりょう！</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <button class="big-btn" onclick="showPractice()">もう いちど</button>
+      <button class="big-btn green" onclick="nextDan()">つぎのだん</button>
+      <button class="big-btn orange" onclick="goHome()">ホーム</button>
+    </div>
+  `;
+  fireFireworks(); fireFireworks(); fireFireworks();
+  showScreen('resultScreen');
+}
+
+function nextDan() {
+  currentDan = currentDan >= 9 ? 1 : currentDan + 1;
+  practiceQ = 0; combo = 0;
+  showPractice();
+}
+
+// ====== CHALLENGE ======
+let challengeTimer = null;
+let cTimeLeft = 60;
+let cScore = 0;
+let cCurrentQ = {};
+
+function showChallenge() {
+  cTimeLeft = 60;
+  cScore = 0;
+  document.getElementById('cScore').textContent = '0';
+  document.getElementById('timerText').textContent = '60';
+  document.getElementById('timerCircle').style.strokeDashoffset = '0';
+  generateChallengeQ();
+  showScreen('challengeScreen');
+  startChallengeTimer();
+}
+
+function startChallengeTimer() {
+  if(challengeTimer) clearInterval(challengeTimer);
+  challengeTimer = setInterval(() => {
+    cTimeLeft--;
+    document.getElementById('timerText').textContent = cTimeLeft;
+    const pct = cTimeLeft / 60;
+    document.getElementById('timerCircle').style.strokeDashoffset = (326.7 * (1-pct));
+    if(cTimeLeft <= 0) {
+      clearInterval(challengeTimer);
+      challengeTimer = null;
+      showChallengeResult();
+    }
+  }, 1000);
+}
+
+function generateChallengeQ() {
+  const a = Math.floor(Math.random()*9)+1;
+  const b = Math.floor(Math.random()*9)+1;
+  cCurrentQ = { a, b, answer: a*b };
+  document.getElementById('cQA').textContent = a;
+  document.getElementById('cQB').textContent = b;
+
+  const wrongs = new Set();
+  while(wrongs.size < 3) {
+    let w = a*b + (Math.random()<0.5?1:-1)*(Math.floor(Math.random()*6)+1);
+    if(w>0 && w!==a*b) wrongs.add(w);
+  }
+  const options = [...wrongs, a*b].sort(()=>Math.random()-0.5);
+
+  const grid = document.getElementById('cAnswerGrid');
+  grid.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = opt;
+    btn.onclick = () => {
+      grid.querySelectorAll('.ans-btn').forEach(b=>b.onclick=null);
+      if(opt === cCurrentQ.answer) {
+        btn.classList.add('correct');
+        cScore++;
+        state.stars++;
+        document.getElementById('cScore').textContent = cScore;
+        const cr = document.getElementById('cResultMsg');
+        const msgs = ['せいかい！','すごい！','やった！'];
+        cr.textContent = msgs[Math.floor(Math.random()*msgs.length)];
+        cr.className = 'result-msg show good';
+        setTimeout(()=>{ cr.classList.remove('show'); generateChallengeQ(); }, 600);
+      } else {
+        btn.classList.add('wrong');
+        grid.querySelectorAll('.ans-btn').forEach(b=>{ if(parseInt(b.textContent)===cCurrentQ.answer) b.classList.add('correct'); });
+        const cr = document.getElementById('cResultMsg');
+        cr.textContent = 'ちがう！';
+        cr.className = 'result-msg show bad';
+        setTimeout(()=>{ cr.classList.remove('show'); generateChallengeQ(); }, 800);
+      }
+      checkStreak();
+      saveState();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function showChallengeResult() {
+  const rank = cScore >= 20 ? '🥇' : cScore >= 15 ? '🥈' : cScore >= 10 ? '🥉' : '🎉';
+  const comment = cScore >= 20 ? 'てんさい！！' : cScore >= 15 ? 'すごすぎる！' : cScore >= 10 ? 'よくできた！' : 'がんばった！';
+  const stars = cScore >= 20 ? '⭐⭐⭐' : cScore >= 10 ? '⭐⭐' : '⭐';
+  const content = document.getElementById('resultContent');
+  content.innerHTML = `
+    <div class="result-emoji">${rank}</div>
+    <div class="result-title">${comment}</div>
+    <div class="result-stars">${stars}</div>
+    <div class="result-score">60びょうで ${cScore}もん せいかい！</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <button class="big-btn" onclick="showChallenge()">もう いちど</button>
+      <button class="big-btn orange" onclick="goHome()">ホーム</button>
+    </div>
+  `;
+  if(cScore >= 10) { fireFireworks(); fireFireworks(); }
+  showScreen('resultScreen');
+}
+
+// ====== TABLE SCREEN ======
+let tableDan = 2;
+function showTable() {
+  buildTableDanSelector();
+  renderKukuTable();
+  showScreen('tableScreen');
+}
+
+function buildTableDanSelector() {
+  const sel = document.getElementById('tableDanSelector');
+  sel.innerHTML = '';
+  for(let d=1;d<=9;d++) {
+    const chip = document.createElement('div');
+    chip.className = 'dan-chip' + (d===tableDan?' selected':'');
+    chip.textContent = d+'のだん';
+    chip.onclick = () => { tableDan = d; buildTableDanSelector(); renderKukuTable(); };
+    sel.appendChild(chip);
+  }
+}
+
+function renderKukuTable() {
+  document.getElementById('tableTitle').textContent = tableDan + 'のだん';
+  const tbl = document.getElementById('kukuTable');
+  tbl.innerHTML = '';
+  for(let b=1;b<=9;b++) {
+    const tr = document.createElement('tr');
+    const cells = [
+      { text: tableDan, cls:'header-cell' },
+      { text: '×', cls:'header-cell' },
+      { text: b, cls:'header-cell' },
+      { text: '=', cls:'header-cell' },
+      { text: tableDan*b, cls:'highlighted' }
+    ];
+    cells.forEach(c => {
+      const td = document.createElement('td');
+      td.textContent = c.text;
+      if(c.cls) td.className = c.cls;
+      td.style.padding = '8px 10px';
+      td.style.fontSize = '1.1rem';
+      tr.appendChild(td);
+    });
+    tbl.appendChild(tr);
+  }
+}
+
+// ====== STREAK SCREEN ======
+function showStreak() {
+  const cal = document.getElementById('streakCalendar');
+  const today = new Date().toDateString();
+  cal.innerHTML = '<div style="font-weight:800;color:#9BA8B5;font-size:0.8rem;letter-spacing:1px;margin-bottom:10px;text-align:center;">この30にちかん</div>';
+  const row = document.createElement('div');
+  row.className = 'calendar-row';
+  row.style.flexWrap = 'wrap';
+  row.style.gap = '6px';
+  for(let i=29;i>=0;i--) {
+    const d = new Date(Date.now() - i*86400000);
+    const ds = d.toDateString();
+    const div = document.createElement('div');
+    div.className = 'cal-day ' + (ds===today ? 'today' : state.streakDays.includes(ds) ? 'done' : 'empty');
+    div.textContent = d.getDate();
+    row.appendChild(div);
+  }
+  cal.appendChild(row);
+
+  document.getElementById('streakFire').textContent = state.streak > 0 ? '🔥' : '😴';
+  document.getElementById('streakDays').textContent = state.streak + 'にち れんぞく！';
+  showScreen('streakScreen');
+}
+
+// ====== FIREWORKS ======
+function fireFireworks() {
+  const x = Math.random() * window.innerWidth;
+  const y = Math.random() * window.innerHeight * 0.6 + 50;
+  const colors = ['#FF6B6B','#FFD700','#4DD9AC','#B39DFF','#FFB347','#87CEEB'];
+  const fw = document.createElement('div');
+  fw.className = 'firework';
+  fw.style.left = x+'px'; fw.style.top = y+'px';
+  for(let i=0;i<12;i++) {
+    const spark = document.createElement('div');
+    spark.className = 'spark';
+    spark.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const angle = (i/12)*Math.PI*2;
+    const dist = 40+Math.random()*40;
+    spark.style.setProperty('--tx', Math.cos(angle)*dist+'px');
+    spark.style.setProperty('--ty', Math.sin(angle)*dist+'px');
+    spark.style.animationDelay = Math.random()*0.2+'s';
+    fw.appendChild(spark);
+  }
+  document.body.appendChild(fw);
+  setTimeout(()=>fw.remove(), 1200);
+}
+
+// ====== TOAST ======
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// ====== INIT ======
+checkStreak();
+updateStatsBar();
+updateDanProgress();
+updateMascot();
+
+// Show welcome toast
+setTimeout(()=>showToast(state.streak>0 ? `🔥 ${state.streak}にち れんぞく中！えらい！` : '👋 ようこそ！いっしょにべんきょうしよう！'), 500);
+</script>
+</body>
+</html>
